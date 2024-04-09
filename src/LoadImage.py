@@ -1,37 +1,30 @@
 import cv2
-from matplotlib import pyplot as plt
-
-# Load an image from the assets folder
-image = cv2.imread('./assets/stopsign.jpg')
-
-# Check if image loading was successful
-if image is None:
-    print('Could not open or find the image')
-else:
-    # Display the image in a window
-    #cv2.imshow('image', image)
-
-    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    stop_data = cv2.CascadeClassifier('./assets/stop_data.xml')
-    found = stop_data.detectMultiScale(image_gray, minSize=(20,20))
-
-    amount_found = len(found)
-
-    if amount_found != 0: 
-        for(x, y, width, height) in found:
-            cv2.rectangle(image_rgb, (x, y),
-                         (x + width, y + height), 
-                         (0, 255, 0), 5)
-            
 
 
-    plt.subplot(1,1,1,)
-    plt.imshow(image_rgb)
-    plt.show()
-  
-  
-    # Wait for a key press and then close the window
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+face_cascade = cv2.CascadeClassifier('/home/vinicius/visao_computacional/data/haarcascades/haarcascade_frontalface_default.xml')
+# Open the webcam
+cap = cv2.VideoCapture(0)
+
+
+while(True):
+    # Capture frame-by-frame
+    ret, frame = cap.read()
+
+#mudar para rgb 
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    for (x, y, w , h) in faces: 
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+
+    
+    # Display the resulting frame
+    cv2.imshow('Webcam Live Video', frame)
+
+    # Quit if 'q' is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# When everything done, release the capture and destroy the window
+cap.release()
+cv2.destroyAllWindows()

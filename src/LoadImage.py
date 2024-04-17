@@ -1,30 +1,40 @@
+from __future__ import print_function 
 import cv2
+from random import randint
+import sys
+
+class VideoFaceDetector:
 
 
-face_cascade = cv2.CascadeClassifier('/home/vinicius/visao_computacional/data/haarcascades/haarcascade_frontalface_default.xml')
-# Open the webcam
-cap = cv2.VideoCapture(0)
+    def __init__(self, video_path, cascade_path):
+        self.face_cascade = cv2.CascadeClassifier(cascade_path)
+        self.cap = cv2.VideoCapture(video_path)
+       
+        success, self.frame = self.cap.read()
+        if not success:
+            print('Failed to read video')
+            sys.exit(1)
+
+    def detect_faces(self):
+        bboxes = []
+        colors = [] 
+        while True:
+           bbox = cv2.selectROI('Multitracker', self.frame)
+           bboxes.append(bbox)
+           colors.append((randint(0, 255), randint(0, 255), randint(0, 255)))
+           k = cv2.waitKey(0) & 0xFF
+           if (k == 113): 
+               break 
+
+        self.cap.release()
+        cv2.destroyAllWindows()
+
+        print('Selected bounding boxes {}'.format(bboxes))
 
 
-while(True):
-    # Capture frame-by-frame
-    ret, frame = cap.read()
 
-#mudar para rgb 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-
-    for (x, y, w , h) in faces: 
-        cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
-
-    
-    # Display the resulting frame
-    cv2.imshow('Webcam Live Video', frame)
-
-    # Quit if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# When everything done, release the capture and destroy the window
-cap.release()
-cv2.destroyAllWindows()
+# Usage
+video_path = '/home/vinicius/visao_computacional/assets/4K Video of Highway Traffic!.mp4'
+cascade_path = '/home/vinicius/visao_computacional/data/haarcascades/haarcascade_frontalface_default.xml'
+detector = VideoFaceDetector(video_path, cascade_path)
+detector.detect_faces()
